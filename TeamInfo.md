@@ -12,8 +12,8 @@
 | Member1     | asanjay3@illinois.edu  |
 | Member2     |       Karan Shah       |
 | Member2     |  karans5@illinois.edu  |
-| Member3     |                        |
-| Member3     |                        |
+| Member3     |      Reva Jethwani     |
+| Member3     |  revaj2@illinois.edu   |
 
 ## Project Information
 
