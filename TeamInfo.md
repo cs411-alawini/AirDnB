@@ -25,5 +25,5 @@
 
 ## Project Summary
 
-A one-stop portal for users seeking to explore or stay in NYC, offering detailed insights into AirBnB accommodations in neighborhoods based on safety, transportation options, and local amenities. 
+A one-stop portal for users seeking to explore or stay in NYC, offering detailed insights into AirBnB accommodations in neighborhoods based on safety, transportation options, and local amenities. AirDnB is a innovative name that plays on with the widely known name of AirBnb, but has a splash of databases in it. The D and B in the name stand for database. 
 
