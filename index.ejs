@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>AirDnB</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</head>
+<body>
+  <div class="container mt-4">
+    <div class="card">
+      <div class="card-body">
+        <h1>AirDnB: All in One Platform</h1>
+        <h2>Please enter the Listing URL you'd like to search for Restaurants near</h2>
+        <form action="mark" method="POST">
+          <div class="form-group">
+            <label for="URL">Net ID</label>
+            <input type="text" class="form-control col-lg-9" id="URL" placeholder="Enter Listing URL" name="URL">
+          </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        
+        <!-- Button to Load restaurant -->
+        <button type="button" class="btn btn-info mt-3" id="loadRestaurantsBtn" data-toggle="modal" data-target="#viewRestaurantsModal">
+          View Restaurants
+        </button>
+
+        <!-- Button to View Restaurant Distribution by Borough -->
+        <button type="button" class="btn btn-secondary mt-3" id="loadBoroughDataBtn" data-toggle="modal" data-target="#boroughDataModal">
+          View Restaurant Counts by Borough
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal for Viewing restaurant -->
+    <div class="modal fade" id="viewRestaurantsModal" tabindex="-1" role="dialog" aria-labelledby="viewRestaurantsModal" aria-hidden="true">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="viewRestaurantsModal">Restaurants Nearby</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">URL</th>
+                  <th scope="col">Restaurant Name</th>
+                </tr>
+              </thead>
+              <tbody id="restaurantBody">
+                <!-- restaurant rows will be inserted here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for Viewing Restaurants by Borough -->
+    <div class="modal fade" id="boroughDataModal" tabindex="-1" role="dialog" aria-labelledby="boroughDataModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="boroughDataModalLabel">Restaurant Count by Borough</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Borough</th>
+                  <th scope="col">Number of Restaurants</th>
+                </tr>
+              </thead>
+              <tbody id="boroughDataBody">
+                <!-- Data rows will be inserted here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  $(document).ready(function() {
+    $('#loadRestaurantsBtn').click(function() {
+  $.ajax({
+    url: '/api/restaurants',
+    method: 'GET',
+    success: function(data) {
+      var rows = '';
+      data.forEach(function(restaurant, index) { // Corrected this line
+        rows += `<tr>
+                   <th scope="row">${index + 1}</th>
+                   <td>${restaurant.URL}</td>
+                   <td>${restaurant.RestaurantName}</td>
+                 </tr>`;
+      });
+      $('#restaurantBody').html(rows);
+    },
+    error: function() {
+      alert('Failed to load restaurant data.');
+    }
+  });
+});
+
+
+    $('#loadBoroughDataBtn').click(function() {
+      $.ajax({
+        url: '/api/boroughs/restaurants',
+        method: 'GET',
+        success: function(data) {
+          var rows = '';
+          data.forEach(function(borough, index) {
+            rows += `<tr>
+                       <th scope="row">${index + 1}</th>
+                       <td>${borough.Borough}</td>
+                       <td>${borough.NumberOfRestaurants}</td>
+                     </tr>`;
+          });
+          $('#boroughDataBody').html(rows);
+          $('#boroughDataModal').modal('show');
+        },
+        error: function() {
+          alert('Failed to load borough data.');
+        }
+      });
+    });
+  });
+  </script>
+</body>
+</html>
+
