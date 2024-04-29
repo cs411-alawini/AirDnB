@@ -107,6 +107,7 @@
 
     <div class="card mt-4">
       <div class="card-body">
+        <button type="button" onclick="fetchData('/airbnbsByBorough', '#airbnbResults')" class="btn btn-secondary">AirBnBs by Borough</button>
         <button type="button" onclick="fetchData('/subwayStationsByBorough', '#subwayResults')" class="btn btn-secondary">Subway Stations by Borough</button>
         <button type="button" onclick="fetchData('/restaurantsByBorough', '#restaurantResults')" class="btn btn-secondary">Restaurants by Borough</button>
         <div id="subwayResults" class="mt-3"></div>
@@ -150,7 +151,7 @@
             var formattedData = '';
             data.forEach((item, index) => {
                 formattedData += `<div class="result-item">
-                                    <strong>${item.Borough}:</strong> ${item.NumberOfSubwayStations || item.NumberOfRestaurants}
+                                    <strong>${item.Borough}:</strong> ${item.NumberOfAirBnbs || item.NumberOfSubwayStations || item.NumberOfRestaurants}
                                   </div>`;
             });
             document.querySelector(resultElement).innerHTML = formattedData;
