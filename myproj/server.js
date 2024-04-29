@@ -30,23 +30,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(__dirname + '../public'));
 
 
-app.get('/', function(req, res) {
-  if (req.session.username) {
-    res.redirect('/index');
-  } else {
-    res.redirect('/login');
-  }
-});
-
-app.get('/index', function(req, res) {
-  if (req.session.username) {
-    res.render('index', { title: 'Home', user: req.session.username });
-  } else {
-    res.redirect('/login');
-  }
-});
-
-
 app.post('/login', function(req, res) {
   const { username } = req.body;
   connection.query('SELECT * FROM User WHERE username = ?', [username], function(error, results) {
@@ -60,6 +43,22 @@ app.post('/login', function(req, res) {
           res.send('Username does not exist'); 
       }
   });
+});
+
+app.get('/index', function(req, res) {
+  if (req.session.username) {
+    res.render('index', { title: 'Home', user: req.session.username });
+  } else {
+    res.redirect('/login');
+  }
+});
+
+app.get('/', function(req, res) {
+  if (req.session.username) {
+    res.redirect('/index');
+  } else {
+    res.redirect('/login');
+  }
 });
 
 app.post('/register', function(req, res) {
