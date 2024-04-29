@@ -30,6 +30,15 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(__dirname + '../public'));
 
 
+app.get('/login', function(req, res) {
+  if (req.session.username) {
+      res.redirect('/index');
+  } else {
+      res.render('login', { title: 'Login' }); 
+  }
+});
+
+
 app.post('/login', function(req, res) {
   const { username } = req.body;
   connection.query('SELECT * FROM User WHERE username = ?', [username], function(error, results) {
