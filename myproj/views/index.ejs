@@ -57,7 +57,16 @@
         </div>
       </div>
     </div>
+  <div class="card mt-4">
+    <div class="card-body">
+      <button type="button" onclick="fetchData('/subwayStationsByBorough', '#subwayResults')">Subway Stations by Borough</button>
+      <button type="button" onclick="fetchData('/restaurantsByBorough', '#restaurantResults')">Restaurants by Borough</button>
+      <div id="subwayResults" class="mt-3"></div>
+      <div id="restaurantResults" class="mt-3"></div>
+    </div>
   </div>
+</div>
+
 
   <script>
   $(document).ready(function() {
@@ -86,6 +95,23 @@
       });
     });
   });
+  function fetchData(endpoint, resultElement) {
+    fetch(endpoint)
+        .then(response => response.json())
+        .then(data => {
+            var formattedData = '';
+            data.forEach((item, index) => {
+                formattedData += `<div class="result-item">
+                                    <strong>${item.Borough}:</strong> ${item.NumberOfSubwayStations || item.NumberOfRestaurants}
+                                  </div>`;
+            });
+            document.querySelector(resultElement).innerHTML = formattedData;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.querySelector(resultElement).innerHTML = 'Failed to load data.';
+        });
+  }
   </script>
 </body>
 </html>
