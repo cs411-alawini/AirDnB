@@ -67,10 +67,14 @@ app.get('/airbnbsByBorough', function(req, res) {
           AND l.Longitude BETWEEN b.MinLong AND b.MaxLong
       )
   GROUP BY
-      b.Borough
+      b.Borough;
   `;
   connection.query(sql, function (error, results, fields) {
-      if (error) throw error;
+      if (error) {
+          console.error('Error fetching Airbnb data:', error);
+          res.status(500).send({ message: 'Error fetching Airbnb data', error: error });
+          return;
+      }
       res.send(results);
   });
 });
