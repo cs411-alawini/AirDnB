@@ -141,6 +141,23 @@ app.get('/restaurantsByBorough', function(req, res) {
   });
 });
 
+function extractRoomId(url) {
+  const regex = /rooms\/(\d+)/;
+  const match = url.match(regex);
+  return match ? match[1] : null;
+}
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.post('/parse-url', function(req, res) {
+  const url = req.body.url;
+  const roomId = extractRoomId(url);
+  if (roomId) {
+    res.send(`Room ID extracted: ${roomId}`);
+  } else {
+    res.send('No Room ID could be extracted.');
+  }
+});
+
 app.listen(80, function () {
     console.log('Node app is running on port 80');
 });
