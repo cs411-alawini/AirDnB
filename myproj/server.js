@@ -14,6 +14,12 @@ connection.connect;
 
 var app = express();
 
+app.use(session({
+  secret: 'airdnb-secret-key', 
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: !true } 
+}));
 
 // set up ejs view engine 
 app.set('views', path.join(__dirname, 'views'));
@@ -26,9 +32,9 @@ app.use(express.static(__dirname + '../public'));
 
 app.get('/', function(req, res) {
   if (req.session.username) {
-    res.redirect('/index'); // User is logged in, go to main content
+    res.redirect('/index');
   } else {
-    res.redirect('/login'); // User is not logged in, go to login page
+    res.redirect('/login');
   }
 });
 
@@ -40,12 +46,6 @@ app.get('/index', function(req, res) {
   }
 });
 
-app.use(session({
-  secret: 'airdnb-secret-key', 
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: !true } 
-}));
 
 app.post('/login', function(req, res) {
   const { username } = req.body;
