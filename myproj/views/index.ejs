@@ -151,7 +151,7 @@
             var formattedData = '';
             data.forEach((item, index) => {
                 formattedData += `<div class="result-item">
-                                    <strong>${item.Borough}:</strong> ${item.NumberOfAirBnbs || item.NumberOfSubwayStations || item.NumberOfRestaurants}
+                                    <strong>${item.Borough}:</strong> ${item.NumberOfAirbnbListings || item.NumberOfSubwayStations || item.NumberOfRestaurants}
                                   </div>`;
             });
             document.querySelector(resultElement).innerHTML = formattedData;
