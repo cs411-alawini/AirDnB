@@ -107,10 +107,12 @@
 
     <div class="card mt-4">
       <div class="card-body">
+        <button type="button" onclick="fetchData('/airbnbsByBorough', '#airbnbResults')" class="btn btn-secondary">Airbnbs by Borough</button>
         <button type="button" onclick="fetchData('/subwayStationsByBorough', '#subwayResults')" class="btn btn-secondary">Subway Stations by Borough</button>
         <button type="button" onclick="fetchData('/restaurantsByBorough', '#restaurantResults')" class="btn btn-secondary">Restaurants by Borough</button>
         <div id="subwayResults" class="mt-3"></div>
         <div id="restaurantResults" class="mt-3"></div>
+        <div id="airbnbResults" class="mt-3"></div>
       </div>
     </div>
   </div>
