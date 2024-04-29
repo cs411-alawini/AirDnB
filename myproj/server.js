@@ -23,21 +23,21 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(__dirname + '../public'));
 
-app.get('/index', function(req, res) {
-  if (req.session.username) {  
-    res.render('index', { title: 'Home', user: req.session.username });
+
+app.get('/', function(req, res) {
+  if (req.session.username) {
+    res.redirect('/index'); // User is logged in, go to main content
   } else {
-    res.redirect('/login'); 
+    res.redirect('/login'); // User is not logged in, go to login page
   }
 });
 
-
-app.get('/', function(req, res) {
-  res.render('index', { title: 'Restaurant Found' });
-});
-
-app.get('/success', function(req, res) {
-      res.send({'message': 'Restaurants searched successfully!'});
+app.get('/index', function(req, res) {
+  if (req.session.username) {
+    res.render('index', { title: 'Home', user: req.session.username });
+  } else {
+    res.redirect('/login');
+  }
 });
 
 app.use(session({
