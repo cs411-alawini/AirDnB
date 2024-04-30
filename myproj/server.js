@@ -228,11 +228,11 @@ async function getCrimeDataNearby(listingID) {
 //   }
 // });
 
-// function extractRoomId(url) {
-//   const regex = /rooms\/(\d+)/;
-//   const match = url.match(regex);
-//   return match ? match[1] : null;
-// }
+function extractRoomId(url) {
+  const regex = /rooms\/(\d+)/;
+  const match = url.match(regex);
+  return match ? match[1] : null;
+}
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.post('/parse-url', function(req, res) {
