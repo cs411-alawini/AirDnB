@@ -82,9 +82,9 @@
                         <label for="phoneNumber">Phone Number:</label>
                         <input type="text" class="form-control" id="phoneNumber" name="phoneNumber">
                     </div>
-                    <button type="submit" class="btn btn-primary" onclick="setFormAction('register')">Register</button>
-                    <button type="submit" class="btn btn-secondary" onclick="setFormAction('modify')">Modify</button>
-                    <button type="submit" class="btn btn-secondary" onclick="setFormAction('delete')">Delete</button>
+                    <button type="button" class="btn btn-primary" onclick="setFormAction('register'); document.getElementById('userForm').submit();">Register</button>
+                    <button type="button" class="btn btn-secondary" onclick="setFormAction('modify'); document.getElementById('userForm').submit();">Modify</button>
+                    <button type="button" class="btn btn-secondary" onclick="setFormAction('delete'); document.getElementById('userForm').submit();">Delete</button>
                 </form>
             </div>
         </div>
