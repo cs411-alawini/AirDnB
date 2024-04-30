@@ -164,14 +164,9 @@
     .then(data => {
         var formattedData = '';
         data.forEach((item, index) => {
-          let count = item.NumberOfAirbnbListings || item.NumberOfSubwayStations || item.NumberOfRestaurants; 
-          if (count === undefined) {
-              console.error('Data property mismatch:', item);
-              count = 'Data unavailable'; 
-          }
-          formattedData += `<div class="result-item">
-                              <strong>${item.Borough}:</strong> ${count}
-                            </div>`;
+            formattedData += `<div class="result-item">
+                                <strong>${item.Borough}:</strong> ${item.NumberOfAirbnbListings || item.NumberOfSubwayStations || item.NumberOfRestaurants}
+                              </div>`;
         });
         document.querySelector(resultElement).innerHTML = formattedData;
     })
