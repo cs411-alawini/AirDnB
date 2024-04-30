@@ -77,8 +77,11 @@
       <div class="ml-auto d-flex align-items-center">
         <!-- Display User Information -->
         <div class="user-info mr-3">
+          <span id="username" class="mr-1"><%= username %></span>
           <span id="userFirstName" class="mr-1"><%= firstName %></span>
           <span id="userLastName"><%= lastName %></span>
+          <span id="userPhoneNumber"><%= phoneNumber %></span>
+          <span id="userEmail"><%= email %></span>
         </div>
         <button onclick="location.href='/logout'" class="btn btn-danger">Logout</button>
       </div>

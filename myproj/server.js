@@ -48,6 +48,8 @@ app.post('/login', function(req, res) {
           req.session.username = username;
           req.session.firstName = results[0].FirstName; 
           req.session.lastName = results[0].LastName;
+          req.session.phoneNumber = results[0].PhoneNumber;
+          req.session.email = results[0].Email;
           res.redirect('/index'); 
       } else {
           res.send('Username does not exist'); 
@@ -62,7 +64,9 @@ app.get('/index', function(req, res) {
       title: 'Home',
       username: req.session.username,
       firstName: req.session.firstName,
-      lastName: req.session.lastName
+      lastName: req.session.lastName,
+      phoneNumber: req.session.lastName,
+      email: req.session.email
     });
   } else {
     res.redirect('/login');
