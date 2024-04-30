@@ -212,21 +212,27 @@ async function getCrimeDataNearby(listingID) {
   return db.query(query, [listingID]);
 }
 
-// app.get('/results', async (req, res) => {
-//   const listingID = req.query.listingID;
-//   if (!listingID) {
-//       return res.status(400).send('Listing ID is required');
-//   }
+app.get('/results', async (req, res) => {
+  const listingID = req.query.listingID;
+  if (!listingID) {
+      return res.status(400).send('Listing ID is required');
+  }
 
-//   try {
-//       const restaurantData = await getClosestRestaurant(listingID);
-//       const subwayData = await getClosestSubwayStation(listingID);
-//       const crimeData = await getCrimeDataNearby(listingID);
-//       res.json({ restaurantData, subwayData, crimeData });
-//   } catch (error) {
-//       res.status(500).send('Server error');
-//   }
-// });
+  try {
+      const restaurantData = await getClosestRestaurant(listingID);
+      const subwayData = await getClosestSubwayStation(listingID);
+      const crimeData = await getCrimeDataNearby(listingID);
+      res.json({ restaurantData, subwayData, crimeData });
+  } catch (error) {
+      res.status(500).send('Server error');
+  }
+});
+
+function extractRoomId(url) {
+  const regex = /rooms\/(\d+)/;
+  const match = url.match(regex);
+  return match ? match[1] : null;
+}
 
 function extractRoomId(url) {
   const regex = /rooms\/(\d+)/;
@@ -238,39 +244,50 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.post('/parse-url', function(req, res) {
   const url = req.body.url;
   const roomId = extractRoomId(url);
-
   if (roomId) {
-      var sql = `
-      SELECT
-          R.RestaurantID,
-          R.RestaurantName,
-          R.Address,
-          (
-              6371 * acos(
-                  cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
-                  cos(radians(R.Latitude)) *
-                  cos(radians(R.Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = ?))) +
-                  sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
-                  sin(radians(R.Latitude))
-              )
-          ) AS Distance
-      FROM
-          Restaurants R
-      ORDER BY
-          Distance ASC
-      LIMIT 3;
-      `;
-      connection.query(sql, [roomId, roomId, roomId], function(error, results) {
-          if (error) {
-              console.error('SQL Error:', error);
-          } else {
-              res.render('results', { restaurants: results });
-          }
-      });
+    res.send(`Room ID extracted: ${roomId}`);
   } else {
-      res.send('No Room ID could be extracted.');
+    res.send('No Room ID could be extracted.');
   }
 });
+
+// app.use(bodyParser.urlencoded({ extended: true }));
+// app.post('/parse-url', function(req, res) {
+//   const url = req.body.url;
+//   const roomId = extractRoomId(url);
+
+//   if (roomId) {
+//       var sql = `
+//       SELECT
+//           R.RestaurantID,
+//           R.RestaurantName,
+//           R.Address,
+//           (
+//               6371 * acos(
+//                   cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
+//                   cos(radians(R.Latitude)) *
+//                   cos(radians(R.Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = ?))) +
+//                   sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
+//                   sin(radians(R.Latitude))
+//               )
+//           ) AS Distance
+//       FROM
+//           Restaurants R
+//       ORDER BY
+//           Distance ASC
+//       LIMIT 3;
+//       `;
+//       connection.query(sql, [roomId, roomId, roomId], function(error, results) {
+//           if (error) {
+//               console.error('SQL Error:', error);
+//           } else {
+//               res.render('results', { restaurants: results });
+//           }
+//       });
+//   } else {
+//       res.send('No Room ID could be extracted.');
+//   }
+// });
 
 
 app.listen(80, function () {

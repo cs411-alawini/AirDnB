@@ -31,7 +31,7 @@
 
   <script>
     $(document).ready(function() {
-      const listingID = new URLSearchParams(window.location.search).get('listingID');
+      const listingID = roomid
       if (!listingID) {
         $('#resultsContainer').html('<p>Error: Listing ID is required.</p>');
       } else {
