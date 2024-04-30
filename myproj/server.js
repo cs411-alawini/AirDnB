@@ -146,110 +146,119 @@ app.get('/restaurantsByBorough', function(req, res) {
   });
 });
 
-async function getClosestRestaurant(listingID) {
-  const query = `
-      SELECT
-          R.RestaurantID,
-          R.RestaurantName,
-          R.Address,
-          (
-              6371 * acos(
-                  cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = $1))) *
-                  cos(radians(R.Latitude)) *
-                  cos(radians(R.Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = $1))) +
-                  sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = $1))) *
-                  sin(radians(R.Latitude))
-              )
-          ) AS Distance
-      FROM
-          Restaurants R
-      ORDER BY
-          Distance ASC
-      LIMIT 5;`;
+app.post('/modify', function(req, res) {
+  const { username, firstName, lastName, email, phoneNumber } = req.body;
 
-  return db.query(query, [listingID]); 
-}
-
-async function getClosestSubwayStation(listingID) {
-  const query = `
-      SELECT
-          S.StationName,
-          (
-              6371 * acos(
-                  cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = $1))) *
-                  cos(radians(S.Latitude)) *
-                  cos(radians(S.Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = $1))) +
-                  sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = $1))) *
-                  sin(radians(S.Latitude))
-              )
-          ) AS Distance
-      FROM
-          subwaystation S
-      ORDER BY
-          Distance ASC
-      LIMIT 1;`;
-
-  return db.query(query, [listingID]);
-}
-
-async function getCrimeDataNearby(listingID) {
-  const query = `
-      SELECT
-          COUNT(*) as NumberOfCrimes
-      FROM
-          CrimeData
-      WHERE
-          (
-              3959 * acos(
-                  cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = $1))) *
-                  cos(radians(Latitude)) *
-                  cos(radians(Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = $1))) +
-                  sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = $1))) *
-                  sin(radians(Latitude))
-              )
-          ) <= 1;`;
-
-  return db.query(query, [listingID]);
-}
-
-app.get('/results', async (req, res) => {
-  const listingID = req.query.listingID;
-  if (!listingID) {
-      return res.status(400).send('Listing ID is required');
-  }
-
-  try {
-      const restaurantData = await getClosestRestaurant(listingID);
-      const subwayData = await getClosestSubwayStation(listingID);
-      const crimeData = await getCrimeDataNearby(listingID);
-      res.json({ restaurantData, subwayData, crimeData });
-  } catch (error) {
-      res.status(500).send('Server error');
-  }
+  // First, check if the username exists
+  connection.query('SELECT username FROM User WHERE username = ?', [username], function(err, result) {
+    if (err) {
+        console.error('Error checking username:', err);
+        return res.status(500).send('Error checking username');
+    }
+    if (result.length > 0) {
+        // Username exists, update the user data
+        connection.query('UPDATE User SET FirstName = ?, LastName = ?, Email = ?, PhoneNumber = ? WHERE username = ?', 
+        [firstName, lastName, email, phoneNumber, username], function(err, result) {
+          if (err) {
+              console.error('Error updating user:', err);
+              return res.status(500).send('Error updating user');
+          }
+          res.send('User updated successfully');
+        });
+    } else {
+        // Username does not exist, do nothing
+        res.send('Username does not exist');
+    }
+  });
 });
 
-function extractRoomId(url) {
-  const regex = /rooms\/(\d+)/;
-  const match = url.match(regex);
-  return match ? match[1] : null;
-}
+// async function getClosestRestaurant(listingID) {
+//   const query = `
+//       SELECT
+//           R.RestaurantID,
+//           R.RestaurantName,
+//           R.Address,
+//           (
+//               6371 * acos(
+//                   cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = $1))) *
+//                   cos(radians(R.Latitude)) *
+//                   cos(radians(R.Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = $1))) +
+//                   sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = $1))) *
+//                   sin(radians(R.Latitude))
+//               )
+//           ) AS Distance
+//       FROM
+//           Restaurants R
+//       ORDER BY
+//           Distance ASC
+//       LIMIT 5;`;
 
-function extractRoomId(url) {
-  const regex = /rooms\/(\d+)/;
-  const match = url.match(regex);
-  return match ? match[1] : null;
-}
+//   return db.query(query, [listingID]); 
+// }
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.post('/parse-url', function(req, res) {
-  const url = req.body.url;
-  const roomId = extractRoomId(url);
-  if (roomId) {
-    res.send(`Room ID extracted: ${roomId}`);
-  } else {
-    res.send('No Room ID could be extracted.');
-  }
-});
+// async function getClosestSubwayStation(listingID) {
+//   const query = `
+//       SELECT
+//           S.StationName,
+//           (
+//               6371 * acos(
+//                   cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = $1))) *
+//                   cos(radians(S.Latitude)) *
+//                   cos(radians(S.Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = $1))) +
+//                   sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = $1))) *
+//                   sin(radians(S.Latitude))
+//               )
+//           ) AS Distance
+//       FROM
+//           subwaystation S
+//       ORDER BY
+//           Distance ASC
+//       LIMIT 1;`;
+
+//   return db.query(query, [listingID]);
+// }
+
+// async function getCrimeDataNearby(listingID) {
+//   const query = `
+//       SELECT
+//           COUNT(*) as NumberOfCrimes
+//       FROM
+//           CrimeData
+//       WHERE
+//           (
+//               3959 * acos(
+//                   cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = $1))) *
+//                   cos(radians(Latitude)) *
+//                   cos(radians(Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = $1))) +
+//                   sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = $1))) *
+//                   sin(radians(Latitude))
+//               )
+//           ) <= 1;`;
+
+//   return db.query(query, [listingID]);
+// }
+
+// app.get('/results', async (req, res) => {
+//   const listingID = req.query.listingID;
+//   if (!listingID) {
+//       return res.status(400).send('Listing ID is required');
+//   }
+
+//   try {
+//       const restaurantData = await getClosestRestaurant(listingID);
+//       const subwayData = await getClosestSubwayStation(listingID);
+//       const crimeData = await getCrimeDataNearby(listingID);
+//       res.json({ restaurantData, subwayData, crimeData });
+//   } catch (error) {
+//       res.status(500).send('Server error');
+//   }
+// });
+
+// function extractRoomId(url) {
+//   const regex = /rooms\/(\d+)/;
+//   const match = url.match(regex);
+//   return match ? match[1] : null;
+// }
 
 // app.use(bodyParser.urlencoded({ extended: true }));
 // app.post('/parse-url', function(req, res) {

@@ -17,11 +17,11 @@
             background-color: #603A40;
             border-color: #FF395C;
         }
-        .btn-primary {
+        .btn-primary, .btn-secondary {
             background-color: #FF395C;
             border-color: #FF395C;
         }
-        .btn-primary:hover {
+        .btn-primary:hover, .btn-secondary:hover {
             background-color: #FF5772;
             border-color: #FF395C;
         }
@@ -29,6 +29,16 @@
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script>
+        function setFormAction(actionType) {
+            var form = document.getElementById('userForm');
+            if (actionType === 'register') {
+                form.action = '/register';
+            } else {
+                form.action = '/modify';
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="container mt-5">
@@ -48,8 +58,8 @@
     <div class="container mt-5">
         <div class="card">
             <div class="card-body">
-                <h1 class="card-title">Register</h1>
-                <form action="/register" method="POST">
+                <h1 class="card-title">Register/Modify</h1>
+                <form id="userForm" action="/register" method="POST">
                     <div class="form-group">
                         <label for="username">Username:</label>
                         <input type="text" class="form-control" id="register_username" name="username" required>
@@ -70,7 +80,8 @@
                         <label for="phoneNumber">Phone Number:</label>
                         <input type="text" class="form-control" id="phoneNumber" name="phoneNumber">
                     </div>
-                    <button type="submit" class="btn btn-primary">Register</button>
+                    <button type="submit" class="btn btn-primary" onclick="setFormAction('register')">Register</button>
+                    <button type="submit" class="btn btn-secondary" onclick="setFormAction('modify')">Modify</button>
                 </form>
             </div>
         </div>
