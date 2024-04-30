@@ -1,66 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>AirDnB Results Based On Your Listing ID</title>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background-color: #191716;
-      color: #FFFFFF;
-    }
-    .card {
-      background-color: #603A40;
-      border-color: #FF395C;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #191716;
+            color: #FFFFFF;
+        }
+        .card {
+            background-color: #603A40;
+            border-color: #FF395C;
+        }
+    </style>
 </head>
 <body>
-  <div class="container mt-5">
-    <div class="card">
-      <div class="card-body">
-        <h1 class="card-title">Results for Listing ID: <span id="listingIDDisplay"></span></h1>
-        <div id="resultsContainer">
+    <div class="container mt-5">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title">Closest Restaurants</h1>
+                <% if (restaurants.length > 0) { %>
+                    <ul class="list-group">
+                        <% restaurants.forEach(function(restaurant) { %>
+                            <li class="list-group-item" style="color: black; background-color: #FFC371;">
+                                Name: <%= restaurant.RestaurantName %><br>
+                                Address: <%= restaurant.Address %><br>
+                                Distance: <%= restaurant.Distance.toFixed(2) %> km
+                            </li>
+                        <% }) %>
+                    </ul>
+                <% } else { %>
+                    <p>No restaurants found.</p>
+                <% } %>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
-
-  <script>
-    $(document).ready(function() {
-      const listingID = roomid
-      if (!listingID) {
-        $('#resultsContainer').html('<p>Error: Listing ID is required.</p>');
-      } else {
-        $.getJSON(`/results?listingID=${listingID}`, function(data) {
-          let resultsHTML = '';
-          if (data.restaurantData.length > 0) {
-            resultsHTML += '<h4>Closest Restaurant:</h4>';
-            data.restaurantData.forEach((restaurant, index) => {
-              resultsHTML += `<p>${index + 1}. ${restaurant.RestaurantName} at ${restaurant.Address}, ${restaurant.Distance.toFixed(2)} km away.</p>`;
-            });
-          } else {
-            resultsHTML += '<p>No nearby restaurants found.</p>';
-          }
-          if (data.subwayData.length > 0) {
-            resultsHTML += '<h4>Closest Subway Station:</h4>';
-            data.subwayData.forEach((station, index) => {
-              resultsHTML += `<p>${index + 1}. ${station.StationName}, ${station.Distance.toFixed(2)} km away.</p>`;
-            });
-          } else {
-            resultsHTML += '<p>No nearby subway stations found.</p>';
-          }
-    
-          $('#resultsContainer').html(resultsHTML);
-        }).fail(function() {
-            $('#resultsContainer').html('<p>Error loading results. Please try again later.</p>');
-        });
-      }
-    });
-    </script>
-   
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 </body>
 </html>
