@@ -181,6 +181,30 @@ app.post('/modify', function(req, res) {
   });
 });
 
+app.post('/delete', function(req, res) {
+  const { username } = req.body;
+  connection.query('SELECT username FROM User WHERE username = ?', [username], function(err, result) {
+    if (err) {
+        console.error('Error checking username:', err);
+        return res.status(500).send('Error checking username');
+    }
+    if (result.length > 0) {
+        connection.query('DELETE FROM User WHERE username = ?', [username], function(err, result) {
+          if (err) {
+              console.error('Error deleting user:', err);
+              return res.status(500).send('Error deleting user');
+          }
+          if (req.session.username === username) {
+              req.session.destroy();
+          }
+          res.send('User deleted successfully');
+        });
+    } else {
+        res.send('Username does not exist');
+    }
+  });
+});
+
 // async function getClosestRestaurant(listingID) {
 //   const query = `
 //       SELECT
