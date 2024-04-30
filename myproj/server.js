@@ -65,7 +65,7 @@ app.get('/index', function(req, res) {
       username: req.session.username,
       firstName: req.session.firstName,
       lastName: req.session.lastName,
-      phoneNumber: req.session.lastName,
+      phoneNumber: req.session.phoneNumber,
       email: req.session.email
     });
   } else {
