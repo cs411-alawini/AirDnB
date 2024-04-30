@@ -46,6 +46,8 @@ app.post('/login', function(req, res) {
       }
       if (results.length > 0) {
           req.session.username = username;
+          req.session.firstName = results[0].FirstName; 
+          req.session.lastName = results[0].LastName;
           res.redirect('/index'); 
       } else {
           res.send('Username does not exist'); 
@@ -53,13 +55,20 @@ app.post('/login', function(req, res) {
   });
 });
 
+
 app.get('/index', function(req, res) {
   if (req.session.username) {
-    res.render('index', { title: 'Home', user: req.session.username });
+    res.render('index', {
+      title: 'Home',
+      username: req.session.username,
+      firstName: req.session.firstName,
+      lastName: req.session.lastName
+    });
   } else {
     res.redirect('/login');
   }
 });
+
 
 app.get('/', function(req, res) {
   if (req.session.username) {
@@ -148,15 +157,12 @@ app.get('/restaurantsByBorough', function(req, res) {
 
 app.post('/modify', function(req, res) {
   const { username, firstName, lastName, email, phoneNumber } = req.body;
-
-  // First, check if the username exists
   connection.query('SELECT username FROM User WHERE username = ?', [username], function(err, result) {
     if (err) {
         console.error('Error checking username:', err);
         return res.status(500).send('Error checking username');
     }
     if (result.length > 0) {
-        // Username exists, update the user data
         connection.query('UPDATE User SET FirstName = ?, LastName = ?, Email = ?, PhoneNumber = ? WHERE username = ?', 
         [firstName, lastName, email, phoneNumber, username], function(err, result) {
           if (err) {
@@ -166,7 +172,6 @@ app.post('/modify', function(req, res) {
           res.send('User updated successfully');
         });
     } else {
-        // Username does not exist, do nothing
         res.send('Username does not exist');
     }
   });

@@ -59,10 +59,27 @@
 </head>
 
 <body>
+  <!-- <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand" href="#">AirDnB</a>
+      <div class="ml-auto d-flex align-items-center">
+        <div class="user-info mr-3">
+          <span id="userFirstName" class="mr-1"><%= firstName %></span>
+          <span id="userLastName"><%= lastName %></span>
+        </div>
+        <button onclick="location.href='/logout'" class="btn btn-danger">Logout</button>
+      </div>
+    </div>
+  </nav>   -->
   <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container">
       <a class="navbar-brand" href="#">AirDnB</a>
-      <div class="ml-auto">
+      <div class="ml-auto d-flex align-items-center">
+        <!-- Display User Information -->
+        <div class="user-info mr-3">
+          <span id="userFirstName" class="mr-1"><%= firstName %></span>
+          <span id="userLastName"><%= lastName %></span>
+        </div>
         <button onclick="location.href='/logout'" class="btn btn-danger">Logout</button>
       </div>
     </div>
@@ -176,5 +193,12 @@
     });
   }
   </script>
+
+<!-- <script>
+  window.onload = function() {
+    document.getElementById('userFirstName').textContent = 'John';
+    document.getElementById('userLastName').textContent = 'Doe';
+  };
+</script> -->
 </body>
 </html>
