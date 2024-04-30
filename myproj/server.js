@@ -114,76 +114,35 @@ app.get('/api/restaurants', function(req, res) {
 });
 
 app.get('/airbnbsByBorough', function(req, res) {
-    var sql = `CALL GetAirbnbsByBorough();`;
-    connection.query('CALL GetAirbnbsByBorough()', function (error, results, fields) {
-      if (error) {
-          console.error('Error fetching Airbnb data:', error);
-          res.status(500).send({ message: 'Error fetching Airbnb data', error: error });
-          return;
-      }
-      res.send(results[0]);
+  connection.query('CALL GetAirbnbsByBorough()', function (error, results, fields) {
+    if (error) {
+        console.error('Error fetching Airbnb data:', error);
+        res.status(500).send({ message: 'Error fetching Airbnb data', error: error });
+        return;
+    }
+    res.send(results[0]);
   });
 });
 
 app.get('/subwayStationsByBorough', function(req, res) {
-  var sql = `
-  SELECT
-      b.Borough,
-      COUNT(s.StationName) AS NumberOfSubwayStations
-  FROM
-      (
-          SELECT 'Bronx' AS Borough, 40.8082 AS MinLat, 40.9093 AS MaxLat, -73.911 AS MinLong, -73.804 AS MaxLong
-          UNION ALL
-          SELECT 'Queens', 40.5915, 40.771, -73.956, -73.76286
-          UNION ALL
-          SELECT 'Staten Island', 40.5083, 40.6393, -74.2010, -74.0562
-          UNION ALL
-          SELECT 'Manhattan', 40.7059, 40.8164, -73.978, -73.928
-          UNION ALL
-          SELECT 'Brooklyn', 40.5876, 40.7277, -74.007, -73.8776
-      ) AS b
-  LEFT JOIN
-      SubwayStation AS s ON (
-          s.Latitude BETWEEN b.MinLat AND b.MaxLat
-          AND s.Longitude BETWEEN b.MinLong AND b.MaxLong
-      )
-  GROUP BY
-      b.Borough;
-  `;
-  connection.query(sql, function (error, results, fields) {
-      if (error) throw error;
-      res.send(results);
+  connection.query('CALL GetSubwayStationsByBorough()', function (error, results, fields) {
+    if (error) {
+        console.error('Error fetching subway station data:', error);
+        res.status(500).send({ message: 'Error fetching subway station data', error: error });
+        return;
+    }
+    res.send(results[0]);
   });
 });
 
 app.get('/restaurantsByBorough', function(req, res) {
-  var sql = `
-  SELECT
-      b.Borough,
-      COUNT(r.RestaurantID) AS NumberOfRestaurants
-  FROM
-      (
-          SELECT 'Bronx' AS Borough, 40.8082 AS MinLat, 40.9093 AS MaxLat, -73.911 AS MinLong, -73.804 AS MaxLong
-          UNION ALL
-          SELECT 'Queens', 40.5915, 40.771, -73.956, -73.76286
-          UNION ALL
-          SELECT 'Staten Island', 40.5083, 40.6393, -74.2010, -74.0562
-          UNION ALL
-          SELECT 'Manhattan', 40.7059, 40.8164, -73.978, -73.928
-          UNION ALL
-          SELECT 'Brooklyn', 40.5876, 40.7277, -74.007, -73.8776
-      ) AS b
-  LEFT JOIN
-      Restaurants AS r ON (
-          r.Latitude BETWEEN b.MinLat AND b.MaxLat
-          AND r.Longitude BETWEEN b.MinLong AND b.MaxLong
-      )
-  GROUP BY
-      b.Borough;
-  `;
-  connection.query(sql, function (error, results, fields) {
-      if (error) throw error;
-      res.send(results);
+  connection.query('CALL GetRestaurantsByBorough()', function (error, results, fields) {
+    if (error) {
+        console.error('Error fetching restaurant data:', error);
+        res.status(500).send({ message: 'Error fetching restaurant data', error: error });
+        return;
+    }
+    res.send(results[0]);
   });
 });
 
