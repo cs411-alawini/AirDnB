@@ -9,7 +9,7 @@
   <style>
     body {
       font-family: 'Poppins', sans-serif;
-      background-color: #d898a4;
+      background-color: #191716;
       color: #FFFFFF;
     }
     .card {
@@ -45,8 +45,6 @@
           } else {
             resultsHTML += '<p>No nearby restaurants found.</p>';
           }
-    
-          // Handling subway station data
           if (data.subwayData.length > 0) {
             resultsHTML += '<h4>Closest Subway Station:</h4>';
             data.subwayData.forEach((station, index) => {
