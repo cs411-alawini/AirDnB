@@ -17,29 +17,49 @@
         }
     </style>
 </head>
-<body>
+  <body>
     <div class="container mt-5">
-        <div class="card">
-            <div class="card-body">
-                <h1 class="card-title">Closest Restaurants</h1>
-                <% if (restaurants.length > 0) { %>
-                    <ul class="list-group">
-                        <% restaurants.forEach(function(restaurant) { %>
-                            <li class="list-group-item" style="color: black; background-color: #FFC371;">
-                                Name: <%= restaurant.RestaurantName %><br>
-                                Address: <%= restaurant.Address %><br>
-                                Distance: <%= restaurant.Distance.toFixed(2) %> km
-                            </li>
-                        <% }) %>
-                    </ul>
-                <% } else { %>
-                    <p>No restaurants found.</p>
-                <% } %>
-            </div>
+      <h1>Results for Listing ID: <%= roomId %></h1>
+      <div class="card">
+        <div class="card-header">Closest Restaurants</div>
+        <div class="card-body">
+          <% if (restaurants.length > 0) { %>
+            <ul>
+              <% restaurants.forEach(restaurant => { %>
+                <li><%= restaurant.RestaurantName %> - <%= restaurant.Distance.toFixed(2) %> km</li>
+              <% }); %>
+            </ul>
+          <% } else { %>
+            <p>No restaurants found.</p>
+          <% } %>
         </div>
+      </div>
+  
+      <div class="card mt-3">
+        <div class="card-header">Nearest Subway Stations</div>
+        <div class="card-body">
+          <% if (subways.length > 0) { %>
+            <ul>
+              <% subways.forEach(subway => { %>
+                <li><%= subway.StationName %> - <%= subway.Distance.toFixed(2) %> km</li>
+              <% }); %>
+            </ul>
+          <% } else { %>
+            <p>No subway stations found.</p>
+          <% } %>
+        </div>
+      </div>
+  
+      <div class="card mt-3">
+        <div class="card-header">Crime Data</div>
+        <div class="card-body">
+          <% if (crimes.length > 0) { %>
+            <p>Number of crimes within 1 km: <%= crimes[0].NumberOfCrimes %></p>
+          <% } else { %>
+            <p>No crime data available.</p>
+          <% } %>
+        </div>
+      </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-</body>
-</html>
+  </body>
+  </html>
