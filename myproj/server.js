@@ -299,42 +299,58 @@ function extractRoomId(url) {
   return match ? match[1] : null;
 }
 
+
 app.post('/results', async function(req, res) {
-  const { url, numRestaurants, numStations } = req.body;
+  const { url, numRestaurants, numStations} = req.body;
   const roomId = extractRoomId(url);
 
-  if (!roomId) {
-    return res.send('No Room ID could be extracted.');
-  }
-
-  try {
-    await connection.beginTransaction();  
-    console.log("Transaction started");
-
-    const restaurantResults = await getClosestRestaurant(roomId, numRestaurants);
-    console.log("Restaurants fetched:", restaurantResults.length);
-
-    const subwayResults = await getClosestSubwayStation(roomId, numStations);
-    console.log("Subway stations fetched:", subwayResults.length);
-
-    const crimeResults = await getCrimeDataNearby(roomId);
-    console.log("Crime data fetched");
-
-    await connection.commit();  
-    console.log("Transaction committed");
-
-    res.render('results', {
-      roomId: roomId,
-      restaurants: restaurantResults,
-      subways: subwayResults,
-      crimes: crimeResults
-    });
-  } catch (error) {
-    await connection.rollback();  
-    console.error("Transaction rolled back due to an error:", error);
-    res.status(500).send('Transaction rolled back due to an error');
-  }
-});
+  if (roomId) {
+    connection.beginTransaction(async (err) => {
+            if (err) {
+              return res.status(500).send('Error starting transaction');
+            }
+    console.log("Room ID:", roomId);
+    try {
+      console.log("Listing ID:", roomId);
+      const restaurantResults = await getClosestRestaurant(roomId, numRestaurants);
+      console.log("Number of Restaurants:", numRestaurants);
+      const subwayResults = await getClosestSubwayStation(roomId, numStations);
+      console.log("Number of Stations:", numStations);
+      const crimeResults = await getCrimeDataNearby(roomId);
+      
+      res.render('results', { 
+        roomId: roomId,
+        restaurants: restaurantResults,
+        subways: subwayResults,
+        crimes: crimeResults
+      });
+      connection.commit((err) => {
+                  if (err) {
+                    connection.rollback(() => {
+                      res.status(500).send('Failed to commit transaction');
+                    });
+                  } else {
+                    console.log("Room ID:", roomId);
+                    console.log("Number of Restaurants:", numRestaurants);
+                    console.log("Number of Stations:", numStations);
+                    res.render('results', {
+                      roomId: roomId,
+                      restaurants: restaurantResults,
+                      subways: subwayResults,
+                      crimes: crimeResults
+                    });
+                  }
+                });
+              } catch (error) {
+                connection.rollback(() => {
+                  res.status(500).send('Transaction rolled back due to an error');
+                });
+              }
+            });
+          } else {
+            res.send('No Room ID could be extracted.');
+          }
+        });
 
 // app.post('/results', async function(req, res) {
 //   const { url, numRestaurants = 5, numStations = 2, crimeDistance = 1 } = req.body;
