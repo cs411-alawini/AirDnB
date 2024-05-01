@@ -161,6 +161,7 @@ app.get('/restaurantsByBorough', function(req, res) {
 
 app.post('/modify', function(req, res) {
   const { username, firstName, lastName, email, phoneNumber } = req.body;
+
   connection.query('SELECT username FROM User WHERE username = ?', [username], function(err, result) {
     if (err) {
         console.error('Error checking username:', err);
@@ -171,12 +172,12 @@ app.post('/modify', function(req, res) {
       [firstName, lastName, email, phoneNumber, username], function(err, result) {
           if (err) {
               console.error('Error updating user:', err);
-              return res.status(500).send('Error updating user');
+              return res.status(500).send('Error updating user: ' + err.message);
           }
-          res.send('User updated successfully');
+          res.send(`${username}'s account updated successfully`);
       });
     } else {
-        res.send('Trigger - can not modify a username. Must delete your account and create a new account');
+        res.send('Username does not exist. Cannot update non-existent user.');
     }
   });
 });
