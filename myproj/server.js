@@ -285,8 +285,8 @@ app.post('/delete', function(req, res) {
 //     });
 //   });
 // }
-const fs = require('fs');
-const path = require('path');
+// const fs = require('fs');
+// const path = require('path');
 function executeSQLFile(filePath) {
   return new Promise((resolve, reject) => {
     fs.readFile(filePath, 'utf8', (err, data) => {
@@ -330,7 +330,7 @@ executeSQLFile(storedProceduresFilePath)
   .catch((err) => {
     console.error('Error executing SQL file:', err);
   });
-  
+
 
 function extractRoomId(url) {
   const regex = /rooms\/(\d+)/;
