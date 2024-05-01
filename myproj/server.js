@@ -319,12 +319,6 @@ app.post('/results', async function(req, res) {
       console.log("Number of Stations:", numStations);
       const crimeResults = await getCrimeDataNearby(roomId);
       
-      res.render('results', { 
-        roomId: roomId,
-        restaurants: restaurantResults,
-        subways: subwayResults,
-        crimes: crimeResults
-      });
       connection.commit((err) => {
                   if (err) {
                     connection.rollback(() => {
