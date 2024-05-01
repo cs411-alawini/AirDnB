@@ -27,7 +27,7 @@ app.set('view engine', 'ejs');
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(__dirname + '../public'));
-
+createUsernameChangeTrigger();
 
 app.get('/login', function(req, res) {
   if (req.session.username) {
@@ -169,7 +169,7 @@ app.post('/modify', function(req, res) {
     if (result.length > 0) {
         connection.query('UPDATE User SET FirstName = ?, LastName = ?, Email = ?, PhoneNumber = ? WHERE username = ?', 
         [firstName, lastName, email, phoneNumber, username], function(err, result) {
-          createUsernameChangeTrigger(); // TESTING HERE!!
+          // createUsernameChangeTrigger(); // TESTING HERE!!
           if (err) {
               console.error('Error updating user:', err);
               return res.status(500).send('Error updating user');
@@ -360,21 +360,38 @@ app.listen(80, function () {
 });
 
 function createUsernameChangeTrigger() {
-  const triggerSQL = `
-    CREATE TRIGGER PreventUsernameChange
-    BEFORE UPDATE ON User
-    FOR EACH ROW
-    BEGIN
-        IF OLD.username <> NEW.username THEN
-            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cannot change username after creation';
-        END IF;
-    END;
-`;
-  connection.query(triggerSQL, function(err, results) {
-      if (err) {
-          console.error('Error creating trigger:', err);
-      } else {
-          console.log('Trigger created successfully:', results);
-      }
+  const checkTriggerSQL = `
+      SELECT TRIGGER_NAME 
+      FROM INFORMATION_SCHEMA.TRIGGERS 
+      WHERE TRIGGER_SCHEMA = 'airdnb-database' 
+      AND TRIGGER_NAME = 'PreventUsernameChange';
+  `;
+
+  connection.query(checkTriggerSQL, function(err, results) {
+    if (err) {
+        console.error('Error checking for existing trigger:', err);
+        return;
+    }
+    if (results.length > 0) {
+        console.log('Trigger already exists, no need to create.');
+    } else {
+        const createTriggerSQL = `
+            CREATE TRIGGER PreventUsernameChange
+            BEFORE UPDATE ON User
+            FOR EACH ROW
+            BEGIN
+                IF OLD.username <> NEW.username THEN
+                    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cannot change username after creation';
+                END IF;
+            END;
+        `;
+        connection.query(createTriggerSQL, function(err, results) {
+            if (err) {
+                console.error('Error creating trigger:', err);
+            } else {
+                console.log('Trigger created successfully:', results);
+            }
+        });
+    }
   });
 }
