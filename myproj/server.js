@@ -176,7 +176,7 @@ app.post('/modify', function(req, res) {
           res.send('User updated successfully');
       });
     } else {
-        res.send('Username does not exist');
+        res.send('Trigger - can not modify a username. Must delete your account and create a new account');
     }
   });
 });
