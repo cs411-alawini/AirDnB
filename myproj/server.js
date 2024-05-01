@@ -332,7 +332,6 @@ app.post('/results', async function(req, res) {
                     console.log("Room ID:", roomId);
                     console.log("Number of Restaurants:", numRestaurants);
                     console.log("Number of Stations:", numStations);
-                    console.log("Crime Data Distance:", crimeDistance);
                     res.render('results', {
                       roomId: roomId,
                       restaurants: restaurantResults,
