@@ -201,8 +201,6 @@ app.post('/delete', function(req, res) {
 function getClosestRestaurant(listingID, numRestaurants = 5) {  
   numRestaurants = parseInt(numRestaurants, 10);  
   return new Promise((resolve, reject) => {
-    console.log("Listing ID:", listingID);
-    console.log("Number of Restaurants:", numRestaurants);
     const sql = `
       SELECT
           R.RestaurantID,
@@ -223,7 +221,6 @@ function getClosestRestaurant(listingID, numRestaurants = 5) {
           Distance ASC
       LIMIT ?;`;
     connection.query(sql, [listingID, listingID, listingID, numRestaurants], (error, results) => {
-      console.log("SQL Error:", error);
       console.log("SQL Results:", results);
       if (error) {
         reject("Query failed: " + error);
@@ -237,7 +234,8 @@ function getClosestRestaurant(listingID, numRestaurants = 5) {
 }
 
 
-function getClosestSubwayStation(listingID, numStations = 2) {  // Default is 2
+function getClosestSubwayStation(listingID, numStations = 2) { 
+  numStations = parseInt(numStations, 10);  
   return new Promise((resolve, reject) => {
     const sql = `
       SELECT
@@ -266,7 +264,8 @@ function getClosestSubwayStation(listingID, numStations = 2) {  // Default is 2
   });
 }
 
-function getCrimeDataNearby(listingID, distanceKM = 1) {  // Default is 1 km
+function getCrimeDataNearby(listingID, distanceKM = 1) {  
+  distanceKM = parseFloat(distanceKM);
   return new Promise((resolve, reject) => {
     const sql = `
       SELECT
