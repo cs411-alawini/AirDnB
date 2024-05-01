@@ -207,10 +207,10 @@ async function getClosestRestaurant(listingID, callback) {
           R.Address,
           (
               6371 * acos(
-                  cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = $1))) *
+                  cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
                   cos(radians(R.Latitude)) *
-                  cos(radians(R.Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = $1))) +
-                  sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = $1))) *
+                  cos(radians(R.Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = ?))) +
+                  sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
                   sin(radians(R.Latitude))
               )
           ) AS Distance
@@ -237,10 +237,10 @@ async function getClosestSubwayStation(listingID, callback) {
           S.StationName,
           (
               6371 * acos(
-                  cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = $1))) *
+                  cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
                   cos(radians(S.Latitude)) *
-                  cos(radians(S.Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = $1))) +
-                  sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = $1))) *
+                  cos(radians(S.Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = ?))) +
+                  sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
                   sin(radians(S.Latitude))
               )
           ) AS Distance
@@ -248,7 +248,7 @@ async function getClosestSubwayStation(listingID, callback) {
           subwaystation S
       ORDER BY
           Distance ASC
-      LIMIT 1;`;
+      LIMIT 2;`;
 
       connection.query(sql, [listingID, listingID, listingID], function(error, results) {
         if (error) {
@@ -271,10 +271,10 @@ async function getCrimeDataNearby(listingID, callback) {
       WHERE
           (
               3959 * acos(
-                  cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = $1))) *
+                  cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
                   cos(radians(Latitude)) *
-                  cos(radians(Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = $1))) +
-                  sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = $1))) *
+                  cos(radians(Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = ?))) +
+                  sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?)) *
                   sin(radians(Latitude))
               )
           ) <= 1;`;
@@ -360,6 +360,7 @@ app.post('/parse-url', async function(req, res) {
       const restaurantResults = await getClosestRestaurant(roomId);
       // const subwayResults = await getClosestSubwayStation(roomId);
       // const crimeResults = await getCrimeDataNearby(roomId);
+      console.log("Restaurant Results:", restaurantResults);
       res.render('results', { 
         restaurants: restaurantResults,
         // subways: subwayResults,
