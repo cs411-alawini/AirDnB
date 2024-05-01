@@ -499,3 +499,70 @@ function createUsernameChangeTrigger() {
     }
   });
 }
+
+
+app.post('/user-operation', function(req, res) {
+  const { username, firstName, lastName, email, phoneNumber, operation } = req.body;
+
+  switch(operation) {
+      case 'register':
+        // const { username, firstName, lastName, email, phoneNumber } = req.body;
+        connection.query('SELECT username FROM User WHERE username = ?', [username], function(err, result) {
+          if (err) {
+              console.error('Error checking username:', err);
+              return res.status(500).send('Error checking username');
+          }
+          if (result.length > 0) {
+              return res.send('Username already exists');
+          }
+          connection.query('INSERT INTO User (username, FirstName, LastName, Email, PhoneNumber) VALUES (?, ?, ?, ?, ?)', [username, firstName, lastName, email, phoneNumber], function(err, result) {
+            if (err) {
+                console.error('Error adding new user:', err);
+                return res.status(500).send('Error registering new user');
+            }
+            res.redirect('/login'); 
+          });
+      });
+          break;
+      case 'modify':
+        // const { username, firstName, lastName, email, phoneNumber } = req.body;
+
+        connection.query('SELECT username FROM User WHERE username = ?', [username], function(err, result) {
+          if (err) {
+              console.error('Error checking username:', err);
+              return res.status(500).send('Error checking username');
+          }
+          if (result.length > 0) {
+            connection.query('UPDATE User SET FirstName = ?, LastName = ?, Email = ?, PhoneNumber = ? WHERE username = ?',
+            [firstName, lastName, email, phoneNumber, username], function(err, result) {
+                if (err) {
+                    console.error('Error updating user:', err);
+                    return res.status(500).send('Error updating user: ' + err.message);
+                }
+                res.send(`${username}'s account updated successfully`);
+            });
+          } else {
+              res.send('TRIGGER - Can not modify a username!');
+          }
+        });
+          break;
+      case 'delete':
+        // const { username } = req.body;
+        if (!username) {
+            return res.status(400).send('Username is required for deletion');
+        }
+        connection.query('DELETE FROM User WHERE username = ?', [username], function(err, result) {
+            if (err) {
+                console.error('Error deleting user:', err);
+                return res.status(500).send('Error deleting user');
+            }
+            if (result.affectedRows === 0) {
+                return res.send('No user found with the given username');
+            }
+            res.send('User deleted successfully');
+        });
+          break;
+      default:
+          res.status(400).send('Invalid operation requested');
+  }
+});
