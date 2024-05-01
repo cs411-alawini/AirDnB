@@ -202,7 +202,7 @@ function getClosestRestaurant(listingID, numRestaurants = 5) {
   numRestaurants = parseInt(numRestaurants, 10);  
   return new Promise((resolve, reject) => {
     const sql = `
-      SELECT
+      SELECT DISTINCT
           R.RestaurantID,
           R.RestaurantName,
           R.Address,
@@ -264,8 +264,7 @@ function getClosestSubwayStation(listingID, numStations = 2) {
   });
 }
 
-function getCrimeDataNearby(listingID, distanceKM = 1) {  
-  distanceKM = parseFloat(distanceKM, 10);
+function getCrimeDataNearby(listingID) {  
   return new Promise((resolve, reject) => {
     const sql = `
       SELECT
@@ -281,8 +280,8 @@ function getCrimeDataNearby(listingID, distanceKM = 1) {
                   sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
                   sin(radians(Latitude))
               )
-          ) <= ?;`;  
-    connection.query(sql, [listingID, listingID, listingID, distanceKM], (error, results) => {
+          ) <= 1;`;  
+    connection.query(sql, [listingID, listingID, listingID], (error, results) => {
       if (error) {
         reject(error);
       } else {
@@ -301,7 +300,7 @@ function extractRoomId(url) {
 
 
 app.post('/results', async function(req, res) {
-  const { url, numRestaurants, numStations, crimeDistance } = req.body;
+  const { url, numRestaurants, numStations} = req.body;
   const roomId = extractRoomId(url);
 
   if (roomId) {
@@ -312,9 +311,8 @@ app.post('/results', async function(req, res) {
       console.log("Number of Restaurants:", numRestaurants);
       const subwayResults = await getClosestSubwayStation(roomId, numStations);
       console.log("Number of Stations:", numStations);
-      const crimeResults = await getCrimeDataNearby(roomId, crimeDistance);
+      const crimeResults = await getCrimeDataNearby(roomId);
       
-      console.log("Crime Data Distance:", distanceKM);
       res.render('results', { 
         roomId: roomId,
         restaurants: restaurantResults,
