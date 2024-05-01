@@ -198,7 +198,8 @@ app.post('/delete', function(req, res) {
   });
 });
 
-function getClosestRestaurant(listingID, numRestaurants = 5) {  // Default is 5 if not provided
+function getClosestRestaurant(listingID, numRestaurants = 5) {  
+  numRestaurants = parseInt(numRestaurants, 10);  
   return new Promise((resolve, reject) => {
     console.log("Listing ID:", listingID);
     console.log("Number of Restaurants:", numRestaurants);
