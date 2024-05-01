@@ -355,6 +355,7 @@ app.post('/parse-url', async function(req, res) {
   const roomId = extractRoomId(url);
 
   if (roomId) {
+    res.send(roomId);
     try {
       const restaurantResults = await getClosestRestaurant(roomId);
       const subwayResults = await getClosestSubwayStation(roomId);
