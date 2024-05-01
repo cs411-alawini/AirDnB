@@ -231,9 +231,9 @@ function getClosestRestaurant(listingID) {
   });
 }
 
-
-async function getClosestSubwayStation(listingID, callback) {
-  const sql = `
+function getClosestSubwayStation(listingID) {
+  return new Promise((resolve, reject) => {
+    const sql = `
       SELECT
           S.StationName,
           (
@@ -250,21 +250,21 @@ async function getClosestSubwayStation(listingID, callback) {
       ORDER BY
           Distance ASC
       LIMIT 2;`;
-
-      connection.query(sql, [listingID, listingID, listingID], function(error, results) {
-        if (error) {
-            console.error('SQL Error:', error);
-            callback(error, null);
-        } else {
-            callback(null, results);
-        }
+    connection.query(sql, [listingID, listingID, listingID], (error, results) => {
+      if (error) {
+        console.error('SQL Error:', error);
+        reject(error);
+      } else {
+        resolve(results);
+      }
     });
-      // return db.query(query, [listingID]);
-    }
+  });
+}
 
 
-async function getCrimeDataNearby(listingID, callback) {
-  const sql = `
+function getCrimeDataNearby(listingID) {
+  return new Promise((resolve, reject) => {
+    const sql = `
       SELECT
           COUNT(*) as NumberOfCrimes
       FROM
@@ -275,21 +275,21 @@ async function getCrimeDataNearby(listingID, callback) {
                   cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
                   cos(radians(Latitude)) *
                   cos(radians(Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = ?))) +
-                  sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?)) *
+                  sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
                   sin(radians(Latitude))
               )
           ) <= 1;`;
-
-  connection.query(sql, [listingID, listingID, listingID], function(error, results) {
-    if (error) {
+    connection.query(sql, [listingID, listingID, listingID], (error, results) => {
+      if (error) {
         console.error('SQL Error:', error);
-        callback(error, null);
-    } else {
-        callback(null, results);
-    }
-});
-  // return db.query(query, [listingID]);
+        reject(error);
+      } else {
+        resolve(results);
+      }
+    });
+  });
 }
+
 
 // app.get('/results', async (req, res) => {
 //   const listingID = req.query.listingID;
@@ -359,14 +359,16 @@ app.post('/results', async function(req, res) {
     // res.send(roomId);
     try {
       const restaurantResults = await getClosestRestaurant(roomId);
-      // const subwayResults = await getClosestSubwayStation(roomId);
-      // const crimeResults = await getCrimeDataNearby(roomId);
+      const subwayResults = await getClosestSubwayStation(roomId);
+      const crimeResults = await getCrimeDataNearby(roomId);
       console.log("Restaurant Results:", restaurantResults);
+      console.log("Subway Results:", subwayResults);
+      console.log("Crime Data Results:", crimeResults);
       res.render('results', { 
         roomId: roomId, 
         restaurants: restaurantResults,
-        // subways: subwayResults,
-        // crimes: crimeResults
+        subways: subwayResults,
+        crimes: crimeResults
       });
     } catch (error) {
       console.error('SQL Error:', error);
