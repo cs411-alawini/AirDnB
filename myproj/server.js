@@ -290,21 +290,21 @@ async function getCrimeDataNearby(listingID, callback) {
   // return db.query(query, [listingID]);
 }
 
-app.get('/results', async (req, res) => {
-  const listingID = req.query.listingID;
-  if (!listingID) {
-      return res.status(400).send('Listing ID is required');
-  }
+// app.get('/results', async (req, res) => {
+//   const listingID = req.query.listingID;
+//   if (!listingID) {
+//       return res.status(400).send('Listing ID is required');
+//   }
 
-  try {
-      const restaurantData = await getClosestRestaurant(listingID);
-      const subwayData = await getClosestSubwayStation(listingID);
-      const crimeData = await getCrimeDataNearby(listingID);
-      res.json({ restaurantData, subwayData, crimeData });
-  } catch (error) {
-      res.status(500).send('Server error');
-  }
-});
+//   try {
+//       const restaurantData = await getClosestRestaurant(listingID);
+//       const subwayData = await getClosestSubwayStation(listingID);
+//       const crimeData = await getCrimeDataNearby(listingID);
+//       res.json({ restaurantData, subwayData, crimeData });
+//   } catch (error) {
+//       res.status(500).send('Server error');
+//   }
+// });
 
 function extractRoomId(url) {
   const regex = /rooms\/(\d+)/;
@@ -350,7 +350,7 @@ function extractRoomId(url) {
 //   }
 // });
 
-app.post('/parse-url', async function(req, res) {
+app.post('/results', async function(req, res) {
   const url = req.body.url;
   const roomId = extractRoomId(url);
 
@@ -362,6 +362,7 @@ app.post('/parse-url', async function(req, res) {
       // const crimeResults = await getCrimeDataNearby(roomId);
       console.log("Restaurant Results:", restaurantResults);
       res.render('results', { 
+        roomId: roomId, 
         restaurants: restaurantResults,
         // subways: subwayResults,
         // crimes: crimeResults
