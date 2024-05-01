@@ -169,6 +169,7 @@ app.post('/modify', function(req, res) {
     if (result.length > 0) {
         connection.query('UPDATE User SET FirstName = ?, LastName = ?, Email = ?, PhoneNumber = ? WHERE username = ?', 
         [firstName, lastName, email, phoneNumber, username], function(err, result) {
+          createUsernameChangeTrigger(); // TESTING HERE!!
           if (err) {
               console.error('Error updating user:', err);
               return res.status(500).send('Error updating user');
@@ -202,7 +203,7 @@ app.post('/delete', function(req, res) {
 function getClosestRestaurant(listingID) {
   return new Promise((resolve, reject) => {
     const sql = `
-      SELECT
+      SELECT DISTINCT
           R.RestaurantID,
           R.RestaurantName,
           R.Address,
@@ -383,3 +384,23 @@ app.post('/results', async function(req, res) {
 app.listen(80, function () {
     console.log('Node app is running on port 80');
 });
+
+function createUsernameChangeTrigger() {
+  const triggerSQL = `
+    CREATE TRIGGER PreventUsernameChange
+    BEFORE UPDATE ON User
+    FOR EACH ROW
+    BEGIN
+        IF OLD.username <> NEW.username THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cannot change username after creation';
+        END IF;
+    END;
+`;
+  connection.query(triggerSQL, function(err, results) {
+      if (err) {
+          console.error('Error creating trigger:', err);
+      } else {
+          console.log('Trigger created successfully:', results);
+      }
+  });
+}
