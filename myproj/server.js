@@ -27,7 +27,6 @@ app.set('view engine', 'ejs');
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(__dirname + '../public'));
-createUsernameChangeTrigger();
 
 app.get('/login', function(req, res) {
   if (req.session.username) {
@@ -433,9 +432,9 @@ app.post('/results', async function(req, res) {
 //     res.send('No Room ID could be extracted.');
 //   }
 // });
-// app.listen(80, function () {
-//     console.log('Node app is running on port 80');
-// });
+app.listen(80, function () {
+    console.log('Node app is running on port 80');
+});
 
 function createUsernameChangeTrigger() {
   const checkTriggerSQL = `
