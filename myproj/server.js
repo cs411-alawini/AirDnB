@@ -355,15 +355,15 @@ app.post('/parse-url', async function(req, res) {
   const roomId = extractRoomId(url);
 
   if (roomId) {
-    res.send(roomId);
+    // res.send(roomId);
     try {
       const restaurantResults = await getClosestRestaurant(roomId);
-      const subwayResults = await getClosestSubwayStation(roomId);
-      const crimeResults = await getCrimeDataNearby(roomId);
+      // const subwayResults = await getClosestSubwayStation(roomId);
+      // const crimeResults = await getCrimeDataNearby(roomId);
       res.render('results', { 
         restaurants: restaurantResults,
-        subways: subwayResults,
-        crimes: crimeResults
+        // subways: subwayResults,
+        // crimes: crimeResults
       });
     } catch (error) {
       console.error('SQL Error:', error);
