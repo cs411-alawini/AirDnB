@@ -304,6 +304,10 @@ app.post('/results', async function(req, res) {
   const roomId = extractRoomId(url);
 
   if (roomId) {
+    connection.beginTransaction(async (err) => {
+            if (err) {
+              return res.status(500).send('Error starting transaction');
+            }
     console.log("Room ID:", roomId);
     try {
       console.log("Listing ID:", roomId);
@@ -319,13 +323,34 @@ app.post('/results', async function(req, res) {
         subways: subwayResults,
         crimes: crimeResults
       });
-    } catch (error) {
-      res.status(500).send('Database error occurred');
-    }
-  } else {
-    res.send('No Room ID could be extracted.');
-  }
-});
+      connection.commit((err) => {
+                  if (err) {
+                    connection.rollback(() => {
+                      res.status(500).send('Failed to commit transaction');
+                    });
+                  } else {
+                    console.log("Room ID:", roomId);
+                    console.log("Number of Restaurants:", numRestaurants);
+                    console.log("Number of Stations:", numStations);
+                    console.log("Crime Data Distance:", crimeDistance);
+                    res.render('results', {
+                      roomId: roomId,
+                      restaurants: restaurantResults,
+                      subways: subwayResults,
+                      crimes: crimeResults
+                    });
+                  }
+                });
+              } catch (error) {
+                connection.rollback(() => {
+                  res.status(500).send('Transaction rolled back due to an error');
+                });
+              }
+            });
+          } else {
+            res.send('No Room ID could be extracted.');
+          }
+        });
 
 // app.post('/results', async function(req, res) {
 //   const { url, numRestaurants = 5, numStations = 2, crimeDistance = 1 } = req.body;
