@@ -265,7 +265,7 @@ function getClosestSubwayStation(listingID, numStations = 2) {
 }
 
 function getCrimeDataNearby(listingID, distanceKM = 1) {  
-  distanceKM = parseFloat(distanceKM);
+  distanceKM = parseFloat(distanceKM, 10);
   return new Promise((resolve, reject) => {
     const sql = `
       SELECT
