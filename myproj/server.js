@@ -309,6 +309,7 @@ app.post('/results', async function(req, res) {
             if (err) {
               return res.status(500).send('Error starting transaction');
             }
+    console.log("Transaction Started")      
     console.log("Room ID:", roomId);
     try {
       console.log("Listing ID:", roomId);
@@ -330,6 +331,7 @@ app.post('/results', async function(req, res) {
                       res.status(500).send('Failed to commit transaction');
                     });
                   } else {
+                    console.log("Transaction Completed")      
                     console.log("Room ID:", roomId);
                     console.log("Number of Restaurants:", numRestaurants);
                     console.log("Number of Stations:", numStations);
