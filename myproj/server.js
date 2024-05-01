@@ -198,38 +198,91 @@ app.post('/delete', function(req, res) {
   });
 });
 
-function getClosestRestaurant(listingID, numRestaurants = 5) {  
-  numRestaurants = parseInt(numRestaurants, 10);  
+// function getClosestRestaurant(listingID, numRestaurants = 5) {  
+//   numRestaurants = parseInt(numRestaurants, 10);  
+//   return new Promise((resolve, reject) => {
+//     const sql = `
+//       SELECT DISTINCT
+//           R.RestaurantID,
+//           R.RestaurantName,
+//           R.Address,
+//           (
+//               6371 * acos(
+//                   cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
+//                   cos(radians(R.Latitude)) *
+//                   cos(radians(R.Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = ?))) +
+//                   sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
+//                   sin(radians(R.Latitude))
+//               )
+//           ) AS Distance
+//       FROM
+//           Restaurants R
+//       ORDER BY
+//           Distance ASC
+//       LIMIT ?;`;
+//     connection.query(sql, [listingID, listingID, listingID, numRestaurants], (error, results) => {
+//       console.log("SQL Results:", results);
+//       if (error) {
+//         reject("Query failed: " + error);
+//       } else if (results.length === 0) {
+//         reject("No results found.");
+//       } else {
+//         resolve(results);
+//       }
+//     });
+//   });
+// }
+function getClosestRestaurant(listingID, numRestaurants = 5) {
+  numRestaurants = parseInt(numRestaurants, 10);
+
   return new Promise((resolve, reject) => {
-    const sql = `
-      SELECT DISTINCT
-          R.RestaurantID,
-          R.RestaurantName,
-          R.Address,
-          (
-              6371 * acos(
-                  cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
-                  cos(radians(R.Latitude)) *
-                  cos(radians(R.Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = ?))) +
-                  sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
-                  sin(radians(R.Latitude))
-              )
-          ) AS Distance
-      FROM
-          Restaurants R
-      ORDER BY
-          Distance ASC
-      LIMIT ?;`;
-    connection.query(sql, [listingID, listingID, listingID, numRestaurants], (error, results) => {
-      console.log("SQL Results:", results);
-      if (error) {
-        reject("Query failed: " + error);
-      } else if (results.length === 0) {
-        reject("No results found.");
-      } else {
-        resolve(results);
-      }
-    });
+      connection.beginTransaction(err => {
+          if (err) {
+              return reject('Error starting transaction: ' + err);
+          }
+
+          const sql = `
+              SELECT DISTINCT
+                  R.RestaurantID,
+                  R.RestaurantName,
+                  R.Address,
+                  (
+                      6371 * acos(
+                          cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
+                          cos(radians(R.Latitude)) *
+                          cos(radians(R.Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = ?))) +
+                          sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
+                          sin(radians(R.Latitude))
+                      )
+                  ) AS Distance
+              FROM
+                  Restaurants R
+              ORDER BY
+                  Distance ASC
+              LIMIT ?;`;
+
+          connection.query(sql, [listingID, listingID, listingID, numRestaurants], (error, results) => {
+              if (error) {
+                  connection.rollback(() => {
+                      reject('Query failed, transaction rolled back: ' + error);
+                  });
+              } else if (results.length === 0) {
+                  connection.rollback(() => {
+                      reject('No results found, transaction rolled back.');
+                  });
+              } else {
+                  connection.commit(err => {
+                      if (err) {
+                          connection.rollback(() => {
+                              reject('Error committing transaction: ' + err);
+                          });
+                      } else {
+                          resolve(results);
+                      }
+                  });
+              }
+          });
+      });
   });
 }
 
