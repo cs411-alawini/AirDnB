@@ -198,7 +198,7 @@ app.post('/delete', function(req, res) {
   });
 });
 
-function getClosestRestaurant(listingID, numRestaurants = 5) {  // Default is 5
+function getClosestRestaurant(listingID, numRestaurants) {  // Default is 5
   return new Promise((resolve, reject) => {
     const sql = `
       SELECT
