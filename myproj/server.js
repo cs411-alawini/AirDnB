@@ -340,6 +340,10 @@ app.post('/results', async function(req, res) {
       const restaurantResults = await getClosestRestaurant(roomId, numRestaurants);
       const subwayResults = await getClosestSubwayStation(roomId, numStations);
       const crimeResults = await getCrimeDataNearby(roomId, crimeDistance);
+      console.log("Room ID:", listingID);
+      console.log("Number of Restaurants:", numRestaurants);
+      console.log("Number of Stations:", numStations);
+      console.log("Crime Data Distance:", distanceKM);
       res.render('results', { 
         roomId: roomId,
         restaurants: restaurantResults,
