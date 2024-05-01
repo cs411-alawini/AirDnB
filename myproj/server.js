@@ -198,9 +198,10 @@ app.post('/delete', function(req, res) {
   });
 });
 
-function getClosestRestaurant(listingID, numRestaurants) {  // Default is 5
+function getClosestRestaurant(listingID, numRestaurants = 5) {  // Default is 5 if not provided
   return new Promise((resolve, reject) => {
-    console.log("Listing ID2:", listingID);
+    console.log("Listing ID:", listingID);
+    console.log("Number of Restaurants:", numRestaurants);
     const sql = `
       SELECT
           R.RestaurantID,
@@ -219,18 +220,21 @@ function getClosestRestaurant(listingID, numRestaurants) {  // Default is 5
           Restaurants R
       ORDER BY
           Distance ASC
-      LIMIT 5;`; 
-    console.log("Number of Restaurants2:", numRestaurants);
-    connection.query(sql, [listingID, listingID, listingID], (error, results) => {
-      console.log("Results:", results);
+      LIMIT ?;`;
+    connection.query(sql, [listingID, listingID, listingID, numRestaurants], (error, results) => {
+      console.log("SQL Error:", error);
+      console.log("SQL Results:", results);
       if (error) {
-        reject(error);
+        reject("Query failed: " + error);
+      } else if (results.length === 0) {
+        reject("No results found.");
       } else {
         resolve(results);
       }
     });
   });
 }
+
 
 function getClosestSubwayStation(listingID, numStations = 2) {  // Default is 2
   return new Promise((resolve, reject) => {
