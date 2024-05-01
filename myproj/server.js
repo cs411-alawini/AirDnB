@@ -200,6 +200,7 @@ app.post('/delete', function(req, res) {
 
 function getClosestRestaurant(listingID, numRestaurants) {  // Default is 5
   return new Promise((resolve, reject) => {
+    console.log("Listing ID2:", listingID);
     const sql = `
       SELECT
           R.RestaurantID,
@@ -219,7 +220,9 @@ function getClosestRestaurant(listingID, numRestaurants) {  // Default is 5
       ORDER BY
           Distance ASC
       LIMIT ?;`; 
+    console.log("Number of Restaurants2:", numRestaurants);
     connection.query(sql, [listingID, listingID, listingID, numRestaurants], (error, results) => {
+      console.log("Results:", results);
       if (error) {
         reject(error);
       } else {
