@@ -299,7 +299,7 @@ app.post('/results', async function(req, res) {
 
   if (roomId) {
     try {
-      console.log("Listing ID:", listingID);
+      console.log("Listing ID:", roomId);
       const restaurantResults = await getClosestRestaurant(roomId, numRestaurants);
       console.log("Number of Restaurants:", numRestaurants);
       const subwayResults = await getClosestSubwayStation(roomId, numStations);
