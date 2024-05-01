@@ -1,3 +1,4 @@
+DELIMITER $$
 CREATE PROCEDURE GetNearbyData(
     IN listingID INT,
     IN numRestaurants INT,
@@ -83,3 +84,5 @@ BEGIN
     ELSE
         COMMIT;
     END IF;
+END$$
+DELIMITER ;
