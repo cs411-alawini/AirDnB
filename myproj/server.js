@@ -298,6 +298,7 @@ app.post('/results', async function(req, res) {
   const roomId = extractRoomId(url);
 
   if (roomId) {
+    console.log("Room ID:", roomId);
     try {
       console.log("Listing ID:", roomId);
       const restaurantResults = await getClosestRestaurant(roomId, numRestaurants);
