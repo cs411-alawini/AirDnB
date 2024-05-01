@@ -167,15 +167,14 @@ app.post('/modify', function(req, res) {
         return res.status(500).send('Error checking username');
     }
     if (result.length > 0) {
-        connection.query('UPDATE User SET FirstName = ?, LastName = ?, Email = ?, PhoneNumber = ? WHERE username = ?', 
-        [firstName, lastName, email, phoneNumber, username], function(err, result) {
-          // createUsernameChangeTrigger(); // TESTING HERE!!
+      connection.query('UPDATE User SET FirstName = ?, LastName = ?, Email = ?, PhoneNumber = ? WHERE username = ?',
+      [firstName, lastName, email, phoneNumber, username], function(err, result) {
           if (err) {
               console.error('Error updating user:', err);
               return res.status(500).send('Error updating user');
           }
           res.send('User updated successfully');
-        });
+      });
     } else {
         res.send('Username does not exist');
     }
