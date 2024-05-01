@@ -199,8 +199,9 @@ app.post('/delete', function(req, res) {
 });
 
 
-async function getClosestRestaurant(listingID, callback) {
-  const sql = `
+function getClosestRestaurant(listingID) {
+  return new Promise((resolve, reject) => {
+    const sql = `
       SELECT
           R.RestaurantID,
           R.RestaurantName,
@@ -219,17 +220,17 @@ async function getClosestRestaurant(listingID, callback) {
       ORDER BY
           Distance ASC
       LIMIT 5;`;
-
-      connection.query(sql, [listingID, listingID, listingID], function(error, results) {
-        if (error) {
-            console.error('SQL Error:', error);
-            callback(error, null);
-        } else {
-            callback(null, results);
-        }
+    connection.query(sql, [listingID, listingID, listingID], (error, results) => {
+      if (error) {
+        console.error('SQL Error:', error);
+        reject(error);
+      } else {
+        resolve(results);
+      }
     });
-      // return db.query(query, [listingID]);
+  });
 }
+
 
 async function getClosestSubwayStation(listingID, callback) {
   const sql = `
