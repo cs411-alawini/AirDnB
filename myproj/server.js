@@ -177,7 +177,7 @@ app.post('/modify', function(req, res) {
           res.send(`${username}'s account updated successfully`);
       });
     } else {
-        res.send('Username does not exist. Cannot update non-existent user.');
+        res.send('TRIGGER - Can not modify a username!');
     }
   });
 });
@@ -199,93 +199,138 @@ app.post('/delete', function(req, res) {
   });
 });
 
-function getClosestRestaurant(listingID, numRestaurants = 5) {  // Default is 5
+// function getClosestRestaurant(listingID, numRestaurants = 5) {  // Default is 5
+//   return new Promise((resolve, reject) => {
+//     const sql = `
+//       SELECT
+//           R.RestaurantID,
+//           R.RestaurantName,
+//           R.Address,
+//           (
+//               6371 * acos(
+//                   cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
+//                   cos(radians(R.Latitude)) *
+//                   cos(radians(R.Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = ?))) +
+//                   sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
+//                   sin(radians(R.Latitude))
+//               )
+//           ) AS Distance
+//       FROM
+//           Restaurants R
+//       ORDER BY
+//           Distance ASC
+//       LIMIT ?;`; 
+//     connection.query(sql, [listingID, listingID, listingID, numRestaurants], (error, results) => {
+//       if (error) {
+//         reject(error);
+//       } else {
+//         resolve(results);
+//       }
+//     });
+//   });
+// }
+
+// function getClosestSubwayStation(listingID, numStations = 2) {  // Default is 2
+//   return new Promise((resolve, reject) => {
+//     const sql = `
+//       SELECT
+//           S.StationName,
+//           (
+//               6371 * acos(
+//                   cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
+//                   cos(radians(S.Latitude)) *
+//                   cos(radians(S.Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = ?))) +
+//                   sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
+//                   sin(radians(S.Latitude))
+//               )
+//           ) AS Distance
+//       FROM
+//           SubwayStation S
+//       ORDER BY
+//           Distance ASC
+//       LIMIT ?;`;  
+//     connection.query(sql, [listingID, listingID, listingID, numStations], (error, results) => {
+//       if (error) {
+//         reject(error);
+//       } else {
+//         resolve(results);
+//       }
+//     });
+//   });
+// }
+
+// function getCrimeDataNearby(listingID, distanceKM = 1) {  // Default is 1 km
+//   return new Promise((resolve, reject) => {
+//     const sql = `
+//       SELECT
+//           COUNT(*) as NumberOfCrimes
+//       FROM
+//           CrimeData
+//       WHERE
+//           (
+//               6371 * acos(
+//                   cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
+//                   cos(radians(Latitude)) *
+//                   cos(radians(Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = ?))) +
+//                   sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
+//                   sin(radians(Latitude))
+//               )
+//           ) <= ?;`;  
+//     connection.query(sql, [listingID, listingID, listingID, distanceKM], (error, results) => {
+//       if (error) {
+//         reject(error);
+//       } else {
+//         resolve(results);
+//       }
+//     });
+//   });
+// }
+const fs = require('fs');
+const path = require('path');
+function executeSQLFile(filePath) {
   return new Promise((resolve, reject) => {
-    const sql = `
-      SELECT
-          R.RestaurantID,
-          R.RestaurantName,
-          R.Address,
-          (
-              6371 * acos(
-                  cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
-                  cos(radians(R.Latitude)) *
-                  cos(radians(R.Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = ?))) +
-                  sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
-                  sin(radians(R.Latitude))
-              )
-          ) AS Distance
-      FROM
-          Restaurants R
-      ORDER BY
-          Distance ASC
-      LIMIT ?;`; 
-    connection.query(sql, [listingID, listingID, listingID, numRestaurants], (error, results) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(results);
+    fs.readFile(filePath, 'utf8', (err, data) => {
+      if (err) {
+        reject(err);
+        return;
       }
+
+      const queries = data.split(';').filter(Boolean);
+
+      const executeQueries = () => {
+        if (queries.length === 0) {
+          resolve();
+          return;
+        }
+
+        const query = queries.shift().trim() + ';';
+        connection.query(query, (err, results) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          executeQueries();
+        });
+      };
+
+      executeQueries();
     });
   });
 }
 
-function getClosestSubwayStation(listingID, numStations = 2) {  // Default is 2
-  return new Promise((resolve, reject) => {
-    const sql = `
-      SELECT
-          S.StationName,
-          (
-              6371 * acos(
-                  cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
-                  cos(radians(S.Latitude)) *
-                  cos(radians(S.Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = ?))) +
-                  sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
-                  sin(radians(S.Latitude))
-              )
-          ) AS Distance
-      FROM
-          SubwayStation S
-      ORDER BY
-          Distance ASC
-      LIMIT ?;`;  
-    connection.query(sql, [listingID, listingID, listingID, numStations], (error, results) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(results);
-      }
-    });
-  });
-}
 
-function getCrimeDataNearby(listingID, distanceKM = 1) {  // Default is 1 km
-  return new Promise((resolve, reject) => {
-    const sql = `
-      SELECT
-          COUNT(*) as NumberOfCrimes
-      FROM
-          CrimeData
-      WHERE
-          (
-              6371 * acos(
-                  cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
-                  cos(radians(Latitude)) *
-                  cos(radians(Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = ?))) +
-                  sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
-                  sin(radians(Latitude))
-              )
-          ) <= ?;`;  
-    connection.query(sql, [listingID, listingID, listingID, distanceKM], (error, results) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(results);
-      }
+const storedProceduresFilePath = path.join(__dirname, 'stored_procedures.sql');
+executeSQLFile(storedProceduresFilePath)
+  .then(() => {
+    console.log('SQL file executed successfully');
+    app.listen(80, () => {
+      console.log('Node app is running on port 80');
     });
+  })
+  .catch((err) => {
+    console.error('Error executing SQL file:', err);
   });
-}
-
+  
 
 function extractRoomId(url) {
   const regex = /rooms\/(\d+)/;
