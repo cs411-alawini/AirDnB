@@ -294,147 +294,148 @@ function extractRoomId(url) {
 }
 
 
-// app.post('/results', async function(req, res) {
-//   const { url, numRestaurants, numStations, crimeDistance } = req.body;
-//   const roomId = extractRoomId(url);
-
-//   if (roomId) {
-//     try {
-//       const restaurantResults = await getClosestRestaurant(roomId, numRestaurants);
-//       const subwayResults = await getClosestSubwayStation(roomId, numStations);
-//       const crimeResults = await getCrimeDataNearby(roomId, crimeDistance);
-//       console.log("Room ID:", listingID);
-//       console.log("Number of Restaurants:", numRestaurants);
-//       console.log("Number of Stations:", numStations);
-//       console.log("Crime Data Distance:", distanceKM);
-//       res.render('results', { 
-//         roomId: roomId,
-//         restaurants: restaurantResults,
-//         subways: subwayResults,
-//         crimes: crimeResults
-//       });
-//     } catch (error) {
-//       res.status(500).send('Database error occurred');
-//     }
-//   } else {
-//     res.send('No Room ID could be extracted.');
-//   }
-// });
-
 app.post('/results', async function(req, res) {
-  const { url, numRestaurants = 5, numStations = 2, crimeDistance = 1 } = req.body;
-  const roomId = extractRoomId(url); // Assuming `extractRoomId` is a function that correctly extracts roomId from the URL
+  const { url, numRestaurants, numStations, crimeDistance } = req.body;
+  const roomId = extractRoomId(url);
 
   if (roomId) {
-    connection.beginTransaction(async (err) => {
-      if (err) {
-        return res.status(500).send('Error starting transaction');
-      }
-
-      try {
-        const restaurantResults = await new Promise((resolve, reject) => {
-          const restaurantSql = `
-            SELECT
-              R.RestaurantID,
-              R.RestaurantName,
-              R.Address,
-              (
-                  6371 * acos(
-                      cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
-                      cos(radians(R.Latitude)) *
-                      cos(radians(R.Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = ?))) +
-                      sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
-                      sin(radians(R.Latitude))
-                  )
-              ) AS Distance
-            FROM
-              Restaurants R
-            ORDER BY
-              Distance ASC
-            LIMIT ?;`;
-          connection.query(restaurantSql, [roomId, roomId, roomId, numRestaurants], (error, results) => {
-            if (error) reject(error);
-            else resolve(results);
-          });
-        });
-
-        const subwayResults = await new Promise((resolve, reject) => {
-          const subwaySql = `
-            SELECT
-              S.StationName,
-              (
-                  6371 * acos(
-                      cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
-                      cos(radians(S.Latitude)) *
-                      cos(radians(S.Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = ?))) +
-                      sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
-                      sin(radians(S.Latitude))
-                  )
-              ) AS Distance
-            FROM
-              SubwayStation S
-            ORDER BY
-              Distance ASC
-            LIMIT ?;`;
-          connection.query(subwaySql, [roomId, roomId, roomId, numStations], (error, results) => {
-            if (error) reject(error);
-            else resolve(results);
-          });
-        });
-
-        const crimeResults = await new Promise((resolve, reject) => {
-          const crimeSql = `
-            SELECT
-              COUNT(*) as NumberOfCrimes
-            FROM
-              CrimeData
-            WHERE
-              (
-                  6371 * acos(
-                      cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
-                      cos(radians(Latitude)) *
-                      cos(radians(Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = ?))) +
-                      sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
-                      sin(radians(Latitude))
-                  )
-              ) <= ?;`;
-          connection.query(crimeSql, [roomId, roomId, roomId, crimeDistance], (error, results) => {
-            if (error) reject(error);
-            else resolve(results);
-          });
-        });
-
-        connection.commit((err) => {
-          if (err) {
-            connection.rollback(() => {
-              res.status(500).send('Failed to commit transaction');
-            });
-          } else {
-            console.log("Room ID:", roomId);
-            console.log("Number of Restaurants:", numRestaurants);
-            console.log("Number of Stations:", numStations);
-            console.log("Crime Data Distance:", crimeDistance);
-            res.render('results', {
-              roomId: roomId,
-              restaurants: restaurantResults,
-              subways: subwayResults,
-              crimes: crimeResults
-            });
-          }
-        });
-      } catch (error) {
-        connection.rollback(() => {
-          res.status(500).send('Transaction rolled back due to an error');
-        });
-      }
-    });
+    try {
+      console.log("Listing ID:", listingID);
+      const restaurantResults = await getClosestRestaurant(roomId, numRestaurants);
+      console.log("Number of Restaurants:", numRestaurants);
+      const subwayResults = await getClosestSubwayStation(roomId, numStations);
+      console.log("Number of Stations:", numStations);
+      const crimeResults = await getCrimeDataNearby(roomId, crimeDistance);
+      
+      console.log("Crime Data Distance:", distanceKM);
+      res.render('results', { 
+        roomId: roomId,
+        restaurants: restaurantResults,
+        subways: subwayResults,
+        crimes: crimeResults
+      });
+    } catch (error) {
+      res.status(500).send('Database error occurred');
+    }
   } else {
     res.send('No Room ID could be extracted.');
   }
 });
-app.listen(80, function () {
-    console.log('Node app is running on port 80');
-});
+
+// app.post('/results', async function(req, res) {
+//   const { url, numRestaurants = 5, numStations = 2, crimeDistance = 1 } = req.body;
+//   const roomId = extractRoomId(url); // Assuming `extractRoomId` is a function that correctly extracts roomId from the URL
+
+//   if (roomId) {
+//     connection.beginTransaction(async (err) => {
+//       if (err) {
+//         return res.status(500).send('Error starting transaction');
+//       }
+
+//       try {
+//         const restaurantResults = await new Promise((resolve, reject) => {
+//           const restaurantSql = `
+//             SELECT
+//               R.RestaurantID,
+//               R.RestaurantName,
+//               R.Address,
+//               (
+//                   6371 * acos(
+//                       cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
+//                       cos(radians(R.Latitude)) *
+//                       cos(radians(R.Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = ?))) +
+//                       sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
+//                       sin(radians(R.Latitude))
+//                   )
+//               ) AS Distance
+//             FROM
+//               Restaurants R
+//             ORDER BY
+//               Distance ASC
+//             LIMIT ?;`;
+//           connection.query(restaurantSql, [roomId, roomId, roomId, numRestaurants], (error, results) => {
+//             if (error) reject(error);
+//             else resolve(results);
+//           });
+//         });
+
+//         const subwayResults = await new Promise((resolve, reject) => {
+//           const subwaySql = `
+//             SELECT
+//               S.StationName,
+//               (
+//                   6371 * acos(
+//                       cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
+//                       cos(radians(S.Latitude)) *
+//                       cos(radians(S.Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = ?))) +
+//                       sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
+//                       sin(radians(S.Latitude))
+//                   )
+//               ) AS Distance
+//             FROM
+//               SubwayStation S
+//             ORDER BY
+//               Distance ASC
+//             LIMIT ?;`;
+//           connection.query(subwaySql, [roomId, roomId, roomId, numStations], (error, results) => {
+//             if (error) reject(error);
+//             else resolve(results);
+//           });
+//         });
+
+//         const crimeResults = await new Promise((resolve, reject) => {
+//           const crimeSql = `
+//             SELECT
+//               COUNT(*) as NumberOfCrimes
+//             FROM
+//               CrimeData
+//             WHERE
+//               (
+//                   6371 * acos(
+//                       cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
+//                       cos(radians(Latitude)) *
+//                       cos(radians(Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = ?))) +
+//                       sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
+//                       sin(radians(Latitude))
+//                   )
+//               ) <= ?;`;
+//           connection.query(crimeSql, [roomId, roomId, roomId, crimeDistance], (error, results) => {
+//             if (error) reject(error);
+//             else resolve(results);
+//           });
+//         });
+
+//         connection.commit((err) => {
+//           if (err) {
+//             connection.rollback(() => {
+//               res.status(500).send('Failed to commit transaction');
+//             });
+//           } else {
+//             console.log("Room ID:", roomId);
+//             console.log("Number of Restaurants:", numRestaurants);
+//             console.log("Number of Stations:", numStations);
+//             console.log("Crime Data Distance:", crimeDistance);
+//             res.render('results', {
+//               roomId: roomId,
+//               restaurants: restaurantResults,
+//               subways: subwayResults,
+//               crimes: crimeResults
+//             });
+//           }
+//         });
+//       } catch (error) {
+//         connection.rollback(() => {
+//           res.status(500).send('Transaction rolled back due to an error');
+//         });
+//       }
+//     });
+//   } else {
+//     res.send('No Room ID could be extracted.');
+//   }
+// });
+// app.listen(80, function () {
+//     console.log('Node app is running on port 80');
+// });
 
 function createUsernameChangeTrigger() {
   const checkTriggerSQL = `
