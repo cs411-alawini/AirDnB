@@ -200,7 +200,7 @@ app.post('/delete', function(req, res) {
 
 
 async function getClosestRestaurant(listingID, callback) {
-  const query = `
+  const sql = `
       SELECT
           R.RestaurantID,
           R.RestaurantName,
@@ -232,7 +232,7 @@ async function getClosestRestaurant(listingID, callback) {
 }
 
 async function getClosestSubwayStation(listingID, callback) {
-  const query = `
+  const sql = `
       SELECT
           S.StationName,
           (
@@ -263,7 +263,7 @@ async function getClosestSubwayStation(listingID, callback) {
 
 
 async function getCrimeDataNearby(listingID, callback) {
-  const query = `
+  const sql = `
       SELECT
           COUNT(*) as NumberOfCrimes
       FROM
