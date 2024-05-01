@@ -219,9 +219,9 @@ function getClosestRestaurant(listingID, numRestaurants) {  // Default is 5
           Restaurants R
       ORDER BY
           Distance ASC
-      LIMIT ?;`; 
+      LIMIT 5;`; 
     console.log("Number of Restaurants2:", numRestaurants);
-    connection.query(sql, [listingID, listingID, listingID, numRestaurants], (error, results) => {
+    connection.query(sql, [listingID, listingID, listingID], (error, results) => {
       console.log("Results:", results);
       if (error) {
         reject(error);
