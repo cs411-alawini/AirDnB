@@ -199,11 +199,10 @@ app.post('/delete', function(req, res) {
   });
 });
 
-
-function getClosestRestaurant(listingID) {
+function getClosestRestaurant(listingID, numRestaurants = 5) {  // Default is 5
   return new Promise((resolve, reject) => {
     const sql = `
-      SELECT DISTINCT
+      SELECT
           R.RestaurantID,
           R.RestaurantName,
           R.Address,
@@ -220,10 +219,9 @@ function getClosestRestaurant(listingID) {
           Restaurants R
       ORDER BY
           Distance ASC
-      LIMIT 5;`;
-    connection.query(sql, [listingID, listingID, listingID], (error, results) => {
+      LIMIT ?;`; 
+    connection.query(sql, [listingID, listingID, listingID, numRestaurants], (error, results) => {
       if (error) {
-        console.error('SQL Error:', error);
         reject(error);
       } else {
         resolve(results);
@@ -232,7 +230,7 @@ function getClosestRestaurant(listingID) {
   });
 }
 
-function getClosestSubwayStation(listingID) {
+function getClosestSubwayStation(listingID, numStations = 2) {  // Default is 2
   return new Promise((resolve, reject) => {
     const sql = `
       SELECT
@@ -250,10 +248,9 @@ function getClosestSubwayStation(listingID) {
           SubwayStation S
       ORDER BY
           Distance ASC
-      LIMIT 2;`;
-    connection.query(sql, [listingID, listingID, listingID], (error, results) => {
+      LIMIT ?;`;  
+    connection.query(sql, [listingID, listingID, listingID, numStations], (error, results) => {
       if (error) {
-        console.error('SQL Error:', error);
         reject(error);
       } else {
         resolve(results);
@@ -262,8 +259,7 @@ function getClosestSubwayStation(listingID) {
   });
 }
 
-
-function getCrimeDataNearby(listingID) {
+function getCrimeDataNearby(listingID, distanceKM = 1) {  // Default is 1 km
   return new Promise((resolve, reject) => {
     const sql = `
       SELECT
@@ -272,17 +268,16 @@ function getCrimeDataNearby(listingID) {
           CrimeData
       WHERE
           (
-              3959 * acos(
+              6371 * acos(
                   cos(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
                   cos(radians(Latitude)) *
                   cos(radians(Longitude) - radians((SELECT Longitude FROM AirBnBListing WHERE ListingID = ?))) +
                   sin(radians((SELECT Latitude FROM AirBnBListing WHERE ListingID = ?))) *
                   sin(radians(Latitude))
               )
-          ) <= 1;`;
-    connection.query(sql, [listingID, listingID, listingID], (error, results) => {
+          ) <= ?;`;  
+    connection.query(sql, [listingID, listingID, listingID, distanceKM], (error, results) => {
       if (error) {
-        console.error('SQL Error:', error);
         reject(error);
       } else {
         resolve(results);
@@ -291,22 +286,6 @@ function getCrimeDataNearby(listingID) {
   });
 }
 
-
-// app.get('/results', async (req, res) => {
-//   const listingID = req.query.listingID;
-//   if (!listingID) {
-//       return res.status(400).send('Listing ID is required');
-//   }
-
-//   try {
-//       const restaurantData = await getClosestRestaurant(listingID);
-//       const subwayData = await getClosestSubwayStation(listingID);
-//       const crimeData = await getCrimeDataNearby(listingID);
-//       res.json({ restaurantData, subwayData, crimeData });
-//   } catch (error) {
-//       res.status(500).send('Server error');
-//   }
-// });
 
 function extractRoomId(url) {
   const regex = /rooms\/(\d+)/;
@@ -353,26 +332,21 @@ function extractRoomId(url) {
 // });
 
 app.post('/results', async function(req, res) {
-  const url = req.body.url;
+  const { url, numRestaurants, numStations, crimeDistance } = req.body;
   const roomId = extractRoomId(url);
 
   if (roomId) {
-    // res.send(roomId);
     try {
-      const restaurantResults = await getClosestRestaurant(roomId);
-      const subwayResults = await getClosestSubwayStation(roomId);
-      const crimeResults = await getCrimeDataNearby(roomId);
-      console.log("Restaurant Results:", restaurantResults);
-      console.log("Subway Results:", subwayResults);
-      console.log("Crime Data Results:", crimeResults);
+      const restaurantResults = await getClosestRestaurant(roomId, numRestaurants);
+      const subwayResults = await getClosestSubwayStation(roomId, numStations);
+      const crimeResults = await getCrimeDataNearby(roomId, crimeDistance);
       res.render('results', { 
-        roomId: roomId, 
+        roomId: roomId,
         restaurants: restaurantResults,
         subways: subwayResults,
         crimes: crimeResults
       });
     } catch (error) {
-      console.error('SQL Error:', error);
       res.status(500).send('Database error occurred');
     }
   } else {
