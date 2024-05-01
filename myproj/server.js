@@ -246,7 +246,7 @@ function getClosestSubwayStation(listingID) {
               )
           ) AS Distance
       FROM
-          subwaystation S
+          SubwayStation S
       ORDER BY
           Distance ASC
       LIMIT 2;`;
